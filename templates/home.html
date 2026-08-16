@@ -1,1 +1,11 @@
-<p>Welcome to the restaraunt</p>
+{% extends 'base.html' %}
+
+{% block title %}Homepage{% endblock %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <p>What would you like to order, {{ current_user.username }}?</p>
+    {% else %}
+        <p>Welcome to Dominos!</p>
+    {% endif %}
+{% endblock %}
