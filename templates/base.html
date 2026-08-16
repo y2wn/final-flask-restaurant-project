@@ -27,64 +27,45 @@
                             Account
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a></li>
-                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#registerModal">Sign Up</a></li>
-                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                            {% if current_user.is_authenticated %}
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{{ url_for('login') }}">Login</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('register') }}">Sign Up</a></li>
+                            {% endif %}
                         </ul>
                     </li>
                 </div>
             </div>
         </div>
     </nav>
-
-    <!-- Global Flash Message & Modal Handler -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                
-                {% if category == 'modal-warning' %}
-                    <!-- Center Screen Bootstrap Modal -->
-                    <div class="modal fade" id="flashModal" tabindex="-1" aria-labelledby="flashModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="flashModalLabel">Notice</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body text-dark">
-                                    {{ message }}
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-danger  w-100" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            var myModal = new bootstrap.Modal(document.getElementById('flashModal'));
-                            myModal.show();
-                        });
-                    </script>
-                {% else %}
-                    <div class="container mt-3">
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    </div>
-                {% endif %}
-                
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
+    
     <h1>{% block header %}{% endblock %}</h1>
 
     {% block content %}
     {% endblock %}
+
+    <!-- Logout Modal -->
+
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-dark">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="logoutModalLabel">Notice</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center mt-3 mb-3">
+                    <h5>Are you sure you want to log out?</h5>
+                </div>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger flex-fill">Log Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
