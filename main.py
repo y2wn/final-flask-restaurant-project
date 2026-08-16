@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+import secrets
+
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from models import db, User
@@ -16,12 +18,34 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+@app.after_request
+def apply_csp(response):
+    nonce = secrets.token_urlsafe(16)
+    csp = (
+        f"default-src 'self';"
+        f"script-src 'self' 'self' https://cdn.jsdelivr.net 'unsafe-inline' 'nonce-{nonce}';"
+        f"style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline';"
+        f"frame-ancestors 'none';"
+        f"base-uri 'self';"
+        f"form-action 'self';"
+    )
+    response.headers['Content-Security-Policy'] = csp
+    response.set_cookie('nonce', nonce)
+    return response
+
+@app.before_request
+def ensure_csrf_token():
+    session.setdefault('csrf_token', secrets.token_urlsafe(32))
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 @app.route('/')
 def home():
+    if "csrf_token" not in session:
+        session['csrf_token'] = secrets.token_hex(16)
     return render_template('home.html')
 
 @app.route('/register', methods=['GET', 'POST'])
