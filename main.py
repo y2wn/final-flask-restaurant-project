@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, login_required, current_user, login_user
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from models import db, User
 
@@ -58,6 +58,15 @@ def login():
         else:
             flash("Wrong username or password", "danger")
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    if not current_user.is_authenticated:
+            flash("You are already logged out", "modal-warning")
+            return redirect(url_for('home'))
+    
+    logout_user()
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     with app.app_context():

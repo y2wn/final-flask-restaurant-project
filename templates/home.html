@@ -3,5 +3,9 @@
 {% block title %}Homepage{% endblock %}
 
 {% block content %}
-    <p>Welcome to dominos</p>
+    {% if current_user.is_authenticated %}
+        <p>What would you like to order, {{ current_user.username }}?</p>
+    {% else %}
+        <p>Welcome to Dominos!</p>
+    {% endif %}
 {% endblock %}
