@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # app config
 app.config['SECRET_KEY'] = "supersecret"
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:ben421343@localhost:5432/dominos_pizza"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:ben421343@localhost:5432/pizzeria"
 
 db.init_app(app)
 
