@@ -3,7 +3,7 @@
 {% block title %}Homepage{% endblock %}
 
 {% block header %}
-    <h1 style="margin: 5px">Welcome to Dominos!</h1>
+    <h1 style="margin: 5px">Welcome!</h1>
 {% endblock %}
 
 {% block content %}
@@ -25,7 +25,7 @@
                             <h5 class="card-title">{{ item.name }}</h5>
                             <p class="card-text text-muted">{{ item.description }}</p>
                             <p class="card-subtitle fw-bold mb-3">${{ item.price }}</p>
-                            <a href="{{ url_for('position', name=item.name) }}" class="btn btn-primary mt-auto">View</a>
+                            <a href="{{ url_for('position', name=item.name) }}" class="btn btn-light mt-auto">View</a>
                         </div>
                     </div>
                 </div>
