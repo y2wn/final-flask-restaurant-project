@@ -3,13 +3,14 @@ import secrets
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
-from models import db, User
+from models import Order, db, User, Pizza
+import datetime
 
 app = Flask(__name__)
 
 # app config
 app.config['SECRET_KEY'] = "supersecret"
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:ben421343@localhost:5432/dominos_pizza"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:ben421343@localhost:5432/pizzeria"
 
 db.init_app(app)
 
@@ -25,7 +26,7 @@ def apply_csp(response):
         f"default-src 'self';"
         f"script-src 'self' 'self' https://cdn.jsdelivr.net 'unsafe-inline' 'nonce-{nonce}';"
         f"style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline';"
-        f"img-src 'self' data:;"
+        f"img-src 'self' data: https:;"
         f"frame-ancestors 'none';"
         f"base-uri 'self';"
         f"form-action 'self';"
@@ -43,11 +44,60 @@ def ensure_csrf_token():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+def create_positions():
+    if not Pizza.query.first():
+        margherita = Pizza(
+            name="Margherita Pizza",
+            description="Classic pizza with tomato sauce and mozzarella",
+            price=9.99,
+            status=True,
+            image_url="https://shorturl.at/D4UYa"
+        )
+        pepperoni = Pizza(
+            name="Pepperoni Pizza",
+            description="Pizza with pepperoni slices",
+            price=12.50,
+            status=True,
+            image_url="https://shorturl.at/aZZaN"
+        )
+        mozzarella = Pizza(
+            name="Mozarella Pizza",
+            description="Cheesy pizza with mozzarella cheese",
+            price=14.99,
+            status=True,
+            image_url="https://shorturl.at/70laB"
+        )
+        hawaiian = Pizza(
+            name="Hawaiian Pizza",
+            description="Pizza with ham and pineapple",
+            price=15.99,
+            status=True,
+            image_url="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38"
+        )
+        four_cheese = Pizza(
+            name="Four Cheese Pizza",
+            description="Pizza with four types of cheese",
+            price=16.99,
+            status=True,
+            image_url="https://images.unsplash.com/photo-1571407970349-bc81e7e96d47"
+        )
+        marinara = Pizza(
+            name="Marinara Pizza",
+            description="Classic pizza with marinara sauce",
+            price=13.99,
+            status=True,
+            image_url="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3"
+        )
+
+        db.session.add_all([margherita, pepperoni, mozzarella, hawaiian, four_cheese, marinara])
+        db.session.commit()
+
 @app.route('/')
 def home():
     if "csrf_token" not in session:
         session['csrf_token'] = secrets.token_hex(16)
-    return render_template('home.html')
+    all_positions = Pizza.query.filter_by(status=True).all()
+    return render_template('home.html', items=all_positions)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -86,15 +136,77 @@ def login():
     return render_template('login.html')
 
 @app.route('/logout')
-def logout():
-    if not current_user.is_authenticated:
-            flash("You are already logged out", "modal-warning")
-            return redirect(url_for('home'))
-    
+def logout():    
     logout_user()
     return redirect(url_for('home'))
+
+@app.route('/position/<name>', methods=['GET', 'POST'])
+def position(name):
+    position = Pizza.query.filter_by(name=name).first()
+
+    if request.method == 'POST':
+        if request.form.get('csrf_token') != session.get('csrf_token'):
+            return "Request blocked", 403
+        elif not current_user.is_authenticated:
+            flash("You must be logged in to add items to the cart", "danger")
+            return redirect(url_for('position', name=name))
+        
+        amount = request.form.get('amount')
+        size = request.form.get('size') 
+
+        cart = session.get('cart', {})
+        
+        cart[name] = {
+            'amount': amount,
+            'size': size,
+            'description': position.description,
+            'price': position.price
+        }
+        
+        session['cart'] = cart
+        flash(f"Added {amount} {size} {name} to cart", "success")
+        return redirect(url_for('home'))
+
+    return render_template('position.html', csrf_token=session.get('csrf_token'), position=position)
+
+@app.route('/cart', methods=['GET', 'POST'])
+def cart():
+    cart = session.get('cart')
+    if request.method == 'POST':
+        if request.form.get('csrf_token') != session['csrf_token']:
+            return "Request blocked", 403
+
+        if not cart:
+            flash("Your cart is empty", "danger")
+            return redirect(url_for('home'))
+
+        new_order = Order(order_list=cart, order_time=datetime.datetime.now(), user_id=current_user.id)
+        db.session.add(new_order)
+        db.session.commit()
+
+        session.pop('cart', None)
+        flash("Order placed successfully!", "success")
+        return redirect(url_for('home'))
+
+    return render_template('cart.html',cart=cart, csrf_token=session['csrf_token'])
+
+@app.route('/remove_item/<name>', methods=['POST'])
+@login_required
+def remove_item(name):
+    if request.form.get('csrf_token') != session.get('csrf_token'):
+        return "Request blocked", 403
+
+    cart = session.get('cart', {})
+    
+    if name in cart:
+        cart.pop(name)
+        session['cart'] = cart 
+        flash(f"{name} was removed from your cart.", "success")
+        
+    return redirect(url_for('cart'))
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        create_positions()
     app.run(debug=True)

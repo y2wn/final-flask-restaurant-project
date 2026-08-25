@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+    <div class="container-fluid my-4">
+        
+        {% if cart %}
+            {% for name, details in cart.items() %}
+                <div class="mb-3 border border-light border-3 rounded p-3">
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0 fw-bold">{{ name }}</h2>
+                        
+                        <form action="{{ url_for('remove_item', name=name) }}" method="POST" class="m-0">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn-close" style="font-size: 1.5rem;" aria-label="Remove item"></button>
+                        </form>
+                    </div>
+                    
+                    <hr class="border border-light border-3 rounded-5 opacity-50">
+                    <h3 class="mb-0 text-muted">Size: {{ details.size }} | Quantity: {{ details.amount }}</h3>
+                    <h4 class="mb-0 text-muted">{{ details.description }}</h4>
+                    <h4 class="mb-0 fw-bold">${{ details.price }}</h4>
+                </div>
+            {% endfor %}
+
+            <form action="{{ url_for('cart') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="btn btn-light mt-3">Create order</button>
+            </form>
+            
+        {% else %}
+            <div class="text-center mt-5">
+                <h3>Your cart is empty!</h3>
+                <a href="{{ url_for('home') }}" class="btn btn-light mt-3">Go back to menu</a>
+            </div>
+        {% endif %}
+        
+    </div>
+{% endblock %}
