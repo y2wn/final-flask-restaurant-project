@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ position.name }} | Piazza{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+                    <p class="text-uppercase fw-bold text-pizza mb-2">Make it yours</p>
+                    <h1 class="display-6 fw-bold">{{ position.name }}</h1>
+                    <p class="lead text-secondary">{{ position.description }}</p>
+                    <h2 class="h4 mb-4">${{ '%.2f'|format(position.price) }}</h2>
+                    <form method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <input type="hidden" name="name" value="{{ position.name }}">
+
+                        <div class="col-12 col-md-6">
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="amount" type="number" min="1" max="99" name="amount" placeholder="Enter quantity" required>
+                                <label for="amount">Quantity</label>
+                            </div>
+                            <div class="form-floating">
+                                <select class="form-select" id="size" name="size" aria-label="Size" required>
+                                    <option value="" disabled selected>Choose a size</option>
+                                    <option value="Small">Small</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Large">Large</option>
+                                </select>
+                                <label for="size">Size</label>
+                            </div>
+                        </div>
+                        <button class="btn btn-pizza btn-lg mt-4 px-4" type="submit">Add to cart</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

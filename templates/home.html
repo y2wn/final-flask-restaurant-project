@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Piazza | Fresh pizza, simply made{% endblock %}
+
+{% block body_class %}home-page{% endblock %}
+
+{% block content %}
+    <div class="hero">
+        <div class="container-fluid px-4 py-5">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 py-lg-4">
+                    <p class="text-uppercase fw-bold text-pizza mb-2">Hand-stretched. Stone-baked.</p>
+                    <h1 class="display-3 fw-bold mb-3">Good pizza brings everyone to the table.</h1>
+                    <p class="lead mb-4">Made with patient dough, bright ingredients, and a little Italian spirit.</p>
+                    <a href="{{ url_for('menu') }}" class="btn btn-pizza btn-lg px-4">Explore the menu</a>
+                </div>
+                <div class="col-lg-6 p-3">
+                    <div class="hero-image rounded-4 shadow"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
