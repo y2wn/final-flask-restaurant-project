@@ -1,40 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Homepage{% endblock %}
+{% block title %}Piazza | Fresh pizza, simply made{% endblock %}
 
-{% block header %}
-    <h1 style="margin: 5px">Welcome!</h1>
-{% endblock %}
+{% block body_class %}home-page{% endblock %}
 
 {% block content %}
-    {% if current_user.is_authenticated %}
-        <h4 style="margin: 5px">What would you like to order, {{ current_user.username }}?</h4>
-    {% else %}
-        <h4 style="margin: 5px">What would you like to order?</h4>
-    {% endif %}
-
-    <div class="container-fluid px-4 my-4">
-        <div class="row g-4">
-            
-            {% for item in items %}
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card h-100 shadow-sm">
-                        <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.name }}" style="width: 100%; aspect-ratio: 3 / 2; object-fit: cover;">
-                        
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ item.name }}</h5>
-                            <p class="card-text text-muted">{{ item.description }}</p>
-                            <p class="card-subtitle fw-bold mb-3">${{ item.price }}</p>
-                            <a href="{{ url_for('position', name=item.name) }}" class="btn btn-light mt-auto">View</a>
-                        </div>
-                    </div>
+    <div class="hero">
+        <div class="container-fluid px-4 py-5">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 py-lg-4">
+                    <p class="text-uppercase fw-bold text-pizza mb-2">Hand-stretched. Stone-baked.</p>
+                    <h1 class="display-3 fw-bold mb-3">Good pizza brings everyone to the table.</h1>
+                    <p class="lead mb-4">Made with patient dough, bright ingredients, and a little Italian spirit.</p>
+                    <a href="{{ url_for('menu') }}" class="btn btn-pizza btn-lg px-4">Explore the menu</a>
                 </div>
-            {% else %}
-                <div class="col-12">
-                    <h4>No positions yet</h4>
+                <div class="col-lg-6 p-3">
+                    <div class="hero-image rounded-4 shadow"></div>
                 </div>
-            {% endfor %}
-            
+            </div>
         </div>
     </div>
 {% endblock %}

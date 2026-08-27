@@ -94,10 +94,12 @@ def create_positions():
 
 @app.route('/')
 def home():
-    if "csrf_token" not in session:
-        session['csrf_token'] = secrets.token_hex(16)
+    return render_template('home.html')
+
+@app.route('/menu')
+def menu():
     all_positions = Pizza.query.filter_by(status=True).all()
-    return render_template('home.html', items=all_positions)
+    return render_template('menu.html', items=all_positions)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -165,12 +167,15 @@ def position(name):
         
         session['cart'] = cart
         flash(f"Added {amount} {size} {name} to cart", "success")
-        return redirect(url_for('home'))
+        return redirect(url_for('menu'))
 
     return render_template('position.html', csrf_token=session.get('csrf_token'), position=position)
 
 @app.route('/cart', methods=['GET', 'POST'])
 def cart():
+    if not current_user.is_authenticated:
+        flash("You must be logged in to view the cart", "danger")
+        return redirect(url_for('login'))
     cart = session.get('cart')
     if request.method == 'POST':
         if request.form.get('csrf_token') != session['csrf_token']:
@@ -178,7 +183,7 @@ def cart():
 
         if not cart:
             flash("Your cart is empty", "danger")
-            return redirect(url_for('home'))
+            return redirect(url_for('menu'))
 
         new_order = Order(order_list=cart, order_time=datetime.datetime.now(), user_id=current_user.id)
         db.session.add(new_order)

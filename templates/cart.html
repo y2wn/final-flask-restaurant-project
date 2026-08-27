@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}Cart{% endblock %}
+{% block title %}Cart | Piazza{% endblock %}
 
 {% block content %}
-    <div class="container-fluid my-4">
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div><p class="text-uppercase fw-bold text-pizza mb-2">Ready when you are</p><h1 class="display-6 fw-bold mb-0">Your cart</h1></div>
+            <a href="{{ url_for('menu') }}" class="btn btn-outline-dark">Add more</a>
+        </div>
         
         {% if cart %}
             {% for name, details in cart.items() %}
-                <div class="mb-3 border border-light border-3 rounded p-3">
+                <div class="mb-3 bg-white shadow-sm rounded-3 p-4">
                     
                     <div class="d-flex justify-content-between align-items-center">
                         <h2 class="mb-0 fw-bold">{{ name }}</h2>
@@ -18,16 +22,16 @@
                         </form>
                     </div>
                     
-                    <hr class="border border-light border-3 rounded-5 opacity-50">
+                    <hr>
                     <h3 class="mb-0 text-muted">Size: {{ details.size }} | Quantity: {{ details.amount }}</h3>
                     <h4 class="mb-0 text-muted">{{ details.description }}</h4>
-                    <h4 class="mb-0 fw-bold">${{ details.price }}</h4>
+                    <h4 class="mb-0 fw-bold">Line total: ${{ '%.2f'|format(details.price * (details.amount|int)) }}</h4>
                 </div>
             {% endfor %}
 
             <form action="{{ url_for('cart') }}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <button class="btn btn-light mt-3">Create order</button>
+                <button class="btn btn-pizza btn-lg mt-3">Create order</button>
             </form>
             
         {% else %}
