@@ -36,6 +36,8 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_list = db.Column(db.JSON, nullable=False)
     order_time = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+    total_price = db.Column(db.Float, nullable=False, default=0.0)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status = db.Column(db.String(50), nullable=False, default='Pending')
 
     user = db.relationship('User', back_populates='orders')

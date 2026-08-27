@@ -94,6 +94,21 @@ def create_positions():
 
 @app.route('/')
 def home():
+    if current_user.is_authenticated:
+        if current_user.username == 'admin':
+            return redirect(url_for('admin_orders'))
+
+        just_placed_order = session.pop('just_placed_order', False)
+        order = Order.query.filter_by(user_id=current_user.id).order_by(Order.order_time.desc()).first()
+        if order and not just_placed_order:
+            if order.status == 'Pending':
+                flash("You have a pending order. Please wait for it to be processed.", "info")
+            elif order.status == 'Processing':
+                flash("Your order is being processed. Please wait.", "info")
+            elif order.status == 'Done':
+                flash("Your order has been completed. Enjoy your meal!", "success")
+            elif order.status == 'Cancelled':
+                flash("Your order has been cancelled. Please place a new order.", "danger")
     return render_template('home.html')
 
 @app.route('/menu')
@@ -189,6 +204,7 @@ def cart():
         db.session.add(new_order)
         db.session.commit()
 
+        session['just_placed_order'] = True
         session.pop('cart', None)
         flash("Order placed successfully!", "success")
         return redirect(url_for('home'))
@@ -209,6 +225,27 @@ def remove_item(name):
         flash(f"{name} was removed from your cart.", "success")
         
     return redirect(url_for('cart'))
+
+@app.route('/admin_orders', methods=['GET', 'POST'])
+@login_required
+def admin_orders():
+    if current_user.username != 'admin':
+        flash("You do not have permission to view this page", "danger")
+        return redirect(url_for('home'))
+
+    if request.method == 'POST':
+        order_id = request.form.get('order_id')
+        new_status = request.form.get('status')
+
+        if order_id and new_status:
+            order = Order.query.get(order_id)
+            if order:
+                order.status = new_status
+                db.session.commit()
+                flash(f"Order #{order.id} status updated to {new_status}", "success")
+
+    orders = Order.query.filter(Order.status.in_(['Pending', 'Processing'])).order_by(Order.order_time.desc()).all()
+    return render_template('admin_orders.html', orders=orders)
 
 if __name__ == '__main__':
     with app.app_context():
