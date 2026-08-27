@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Orders | Piazza{% endblock %}
+
+{% block header %}
+<header class="page-heading py-4">
+    <div class="container-fluid px-4">
+        <p class="text-uppercase text-warning fw-bold mb-2">Operations</p>
+        <h1 class="display-5 fw-bold mb-2">Admin orders</h1>
+        <p class="lead mb-0 text-white-50">Live pizza orders from the restaurant floor.</p>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-4 py-5">
+    {% if orders %}
+        <div class="row g-4">
+            {% for order in orders %}
+            <div class="col-12">
+                <article class="bg-white rounded-4 shadow-sm p-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                        <div>
+                            <p class="text-uppercase text-pizza fw-bold mb-1">Order #{{ order.id }}</p>
+                            <h2 class="h4 mb-0">{{ order.user.username }}</h2>
+                        </div>
+                        <span class="badge rounded-pill px-3 py-2 {% if order.status == 'Done' %}text-bg-success{% elif order.status == 'Cancelled' %}text-bg-danger{% else %}text-bg-dark{% endif %}">{{ order.status }}</span>
+                    </div>
+
+                    <div class="row g-3 text-secondary align-items-end">
+                        <div class="col-12 col-md-4">
+                            <p class="mb-1 fw-semibold text-dark">Placed</p>
+                            <p class="mb-0">{{ order.order_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <p class="mb-1 fw-semibold text-dark">Items</p>
+                            <ul class="mb-0 ps-3">
+                                {% for item_name, item in order.order_list.items() %}
+                                    <li>{{ item_name }} — {{ item.size }} × {{ item.amount }} = ${{ '%.2f'|format((item.price|float) * (item.amount|int)) }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <form method="post" class="d-flex gap-2 align-items-center justify-content-md-end">
+                                <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <select class="form-select form-select-sm" name="status" aria-label="Order status">
+                                    <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                    <option value="Done" {% if order.status == 'Done' %}selected{% endif %}>Done</option>
+                                    <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-pizza btn-sm">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <h2 class="h3 mb-3">No orders yet</h2>
+            <p class="text-secondary mb-0">The restaurant is quiet for now.</p>
+        </div>
+    {% endif %}
+</main>
+{% endblock %}
